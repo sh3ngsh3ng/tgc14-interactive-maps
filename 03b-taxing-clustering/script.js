@@ -1,18 +1,15 @@
-function getRandomLatLng(map) {
-    // get the boundaries of the map
-    let bounds = map.getBounds();
-    let southwest = bounds.getSouthWest();
-    let northeast = bounds.getNorthEast();
-    
-    // find the 'width' and 'length' of the box
-    let lng = northeast.lng - southwest.lng;
-    let lat = northeast.lat - southwest.lat;
-
-    // generte a random marker
-    let randomLng = Math.random() * lng + southwest.lng;
-    let randomLat = Math.random() * lat + southwest.lat;
-    console.log(randomLng, randomLat);
-    return [randomLat, randomLng ];
+async function getTaxiCoordinates(map) {
+    let response = await axios.get('https://api.data.gov.sg/v1/transport/taxi-availability');
+    let coordinates = response.data.features[0].geometry.coordinates;
+    let cluster = L.markerClusterGroup();
+    cluster.addTo(map);
+    for (let taxi of coordinates) {
+        let lng = taxi[0];
+        let lat = taxi[1]
+        let actualCoordinate = [ lat, lng];
+        let marker = L.marker(actualCoordinate);
+        marker.addTo(cluster);
+    }
 }
 
 // Leaflet, coordinates are represented by an array of 2 elements
@@ -31,18 +28,4 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
     accessToken: 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw' //demo access token
 }).addTo(map);
 
-// create 1000 markers
-
-// 1.create a marker cluster layer
-let markerClusterLayer = L.markerClusterGroup();
-markerClusterLayer.addTo(map);
-for (let i =0; i < 1000; i++) {
-
-    // get a random coordinate
-    let coordinate = getRandomLatLng(map);
-    // create a marker at that coordinate
-    let marker = L.marker(coordinate);
-    // add the marker to the map
-    marker.addTo(markerClusterLayer);
-
-}
+getTaxiCoordinates(map);
