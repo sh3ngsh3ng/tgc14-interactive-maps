@@ -1,5 +1,6 @@
 async function main() {
     function init() {
+        // global variables across js files are shared
         let map = initMap();
         let searchResultLayer = L.layerGroup();
         window.addEventListener('DOMContentLoaded', function(){
